@@ -1,4 +1,4 @@
-# NeuralCraft — AI Automation Agency Website
+# Badu AI — AI Automation Agency Website
 
 A professional agency website with 3 live AI demo tools, built with pure HTML/CSS/JS. No frameworks, no build step. Deploy instantly to GitHub Pages.
 
@@ -52,4 +52,4 @@ Edit these in each file:
 
 ---
 
-Built by NeuralCraft · Rajshahi, Bangladesh
+Built by Badu AI · Rajshahi, Bangladesh
