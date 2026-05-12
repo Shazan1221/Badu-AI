@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Lead Gen Demo — NeuralCraft</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0a0a;
+    --paper: #f5f2eb;
+    --accent: #c8f135;
+    --accent2: #ff4d1c;
+    --muted: #6b6b5e;
+    --card: #ffffff;
+    --border: #e0ddd4;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; }
+
+  .top-bar {
+    padding: 1rem 3rem; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--paper); position: sticky; top: 0; z-index: 50;
+  }
+  .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem; text-decoration: none; color: var(--ink); }
+  .logo span { color: var(--accent2); }
+  .back-link { font-size: 0.85rem; color: var(--muted); text-decoration: none; }
+  .back-link:hover { color: var(--ink); }
+  .demo-badge { background: var(--accent); color: var(--ink); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.3rem 0.8rem; border-radius: 1px; }
+
+  .hero-strip {
+    background: var(--ink); color: var(--paper);
+    padding: 3.5rem 3rem;
+    display: flex; align-items: flex-end; justify-content: space-between;
+  }
+  .hero-strip h1 { font-family: 'Syne', sans-serif; font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
+  .hero-strip h1 em { color: var(--accent); font-style: normal; }
+  .hero-strip p { max-width: 320px; font-size: 0.9rem; color: rgba(245,242,235,0.6); font-weight: 300; line-height: 1.7; }
+
+  .app-wrapper {
+    max-width: 1200px; margin: 0 auto;
+    padding: 3rem; display: flex; flex-direction: column; gap: 2rem;
+  }
+
+  /* PIPELINE STEPS */
+  .pipeline {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px;
+  }
+  .step-card {
+    background: var(--card); border: 1px solid var(--border);
+    padding: 1.5rem; position: relative;
+  }
+  .step-card.active { border-color: var(--ink); }
+  .step-card.done { border-color: var(--accent); background: #f9fce9; }
+  .step-num { font-family: 'Syne', sans-serif; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.8rem; }
+  .step-icon { font-size: 1.6rem; margin-bottom: 0.6rem; }
+  .step-title { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; margin-bottom: 0.4rem; }
+  .step-desc { font-size: 0.78rem; color: var(--muted); font-weight: 300; line-height: 1.6; }
+  .step-status { position: absolute; top: 1rem; right: 1rem; width: 10px; height: 10px; border-radius: 50%; background: var(--border); }
+  .step-card.active .step-status { background: var(--accent2); animation: pulse 1.2s ease-in-out infinite; }
+  .step-card.done .step-status { background: #22c55e; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .section-row { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+
+  /* LEADS TABLE */
+  .panel { background: var(--card); border: 1px solid var(--border); border-radius: 2px; overflow: hidden; }
+  .panel-header { padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .panel-title { font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700; }
+  .panel-body { padding: 1.5rem; }
+
+  .leads-table { width: 100%; border-collapse: collapse; }
+  .leads-table th { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 0.5rem 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
+  .leads-table td { padding: 0.75rem; font-size: 0.82rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .leads-table tr:last-child td { border-bottom: none; }
+  .leads-table tr { cursor: pointer; transition: background 0.12s; }
+  .leads-table tr:hover td { background: var(--paper); }
+  .leads-table tr.selected td { background: #f0f7e0; }
+  .lead-name { font-weight: 500; }
+  .lead-company { color: var(--muted); font-size: 0.78rem; }
+  .status-badge { display: inline-block; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.25rem 0.6rem; border-radius: 1px; }
+  .s-new { background: var(--paper); color: var(--muted); border: 1px solid var(--border); }
+  .s-generated { background: #f0f7e0; color: #3a6010; }
+  .s-sent { background: #e0f2fe; color: #0369a1; }
+  .select-all-btn {
+    font-size: 0.75rem; padding: 0.3rem 0.8rem; background: transparent;
+    border: 1px solid var(--border); border-radius: 1px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; color: var(--muted); transition: all 0.15s;
+  }
+  .select-all-btn:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+  /* EMAIL COMPOSE */
+  label { display: block; font-size: 0.8rem; font-weight: 500; margin-bottom: 0.4rem; margin-top: 0.9rem; color: var(--ink); }
+  label:first-child { margin-top: 0; }
+  input[type="text"], textarea, select {
+    width: 100%; padding: 0.65rem 0.9rem;
+    border: 1px solid var(--border); border-radius: 2px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
+    background: var(--paper); color: var(--ink); resize: vertical;
+  }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: var(--ink); }
+
+  .output-area {
+    background: var(--paper); border: 1px solid var(--border);
+    border-radius: 2px; padding: 1.2rem;
+    font-size: 0.85rem; line-height: 1.8; font-weight: 300;
+    min-height: 180px; white-space: pre-wrap;
+  }
+  .placeholder-hint { color: var(--muted); font-style: italic; font-size: 0.82rem; }
+
+  .action-row { display: flex; gap: 0.8rem; margin-top: 1rem; }
+  .btn-gen {
+    flex: 1; padding: 0.8rem; background: var(--ink); color: var(--paper);
+    border: none; border-radius: 2px;
+    font-family: 'Syne', sans-serif; font-size: 0.88rem; font-weight: 700;
+    cursor: pointer; transition: background 0.2s;
+  }
+  .btn-gen:hover { background: var(--accent2); }
+  .btn-gen:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-copy {
+    padding: 0.8rem 1.2rem; background: transparent; color: var(--ink);
+    border: 1px solid var(--ink); border-radius: 2px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .btn-copy:hover { background: var(--ink); color: var(--paper); }
+
+  /* STATS */
+  .stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; }
+  .stat-box { background: var(--card); border: 1px solid var(--border); padding: 1.2rem 1.5rem; }
+  .stat-n { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; line-height: 1; }
+  .stat-l { font-size: 0.75rem; color: var(--muted); margin-top: 0.3rem; }
+
+  .loading-dots { display: inline-flex; gap: 5px; vertical-align: middle; }
+  .loading-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--paper); animation: dot-pulse 1.2s ease-in-out infinite; }
+  .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes dot-pulse { 0%,80%,100% { opacity: 0.3; } 40% { opacity: 1; } }
+
+  .api-note {
+    background: #fffbf0; border: 1px solid #f0e6c0;
+    padding: 0.9rem 1.2rem; border-radius: 2px;
+    font-size: 0.8rem; line-height: 1.6; color: #7a6030;
+    display: flex; align-items: center; gap: 1rem; justify-content: space-between;
+  }
+  .api-input { max-width: 280px; padding: 0.5rem 0.8rem; border: 1px solid #f0e6c0; border-radius: 2px; font-size: 0.82rem; background: transparent; color: #5a4010; }
+  .api-input:focus { outline: none; border-color: #c0a060; }
+
+  @media (max-width: 900px) {
+    .app-wrapper { padding: 1.5rem; }
+    .pipeline { grid-template-columns: 1fr 1fr; }
+    .section-row { grid-template-columns: 1fr; }
+    .stats-bar { grid-template-columns: 1fr 1fr; }
+    .hero-strip { padding: 2rem 1.5rem; flex-direction: column; gap: 1rem; }
+    .top-bar { padding: 1rem 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="index.html" class="logo">Neural<span>Craft</span></a>
+  <span class="demo-badge">Live Demo</span>
+  <a href="index.html" class="back-link">← Back to site</a>
+</div>
+
+<div class="hero-strip">
+  <div>
+    <h1>🎯 AI Lead Gen<br><em>&amp; Outreach</em></h1>
+  </div>
+  <p>Pick a lead from the list, define your offer, and watch Claude write a hyper-personalised cold email that actually gets replies.</p>
+</div>
+
+<div class="app-wrapper">
+
+  <!-- PIPELINE -->
+  <div class="pipeline">
+    <div class="step-card done" id="step1">
+      <div class="step-status"></div>
+      <div class="step-num">Step 01</div>
+      <div class="step-icon">📋</div>
+      <div class="step-title">Lead list loaded</div>
+      <div class="step-desc">Leads imported from spreadsheet or CRM</div>
+    </div>
+    <div class="step-card active" id="step2">
+      <div class="step-status"></div>
+      <div class="step-num">Step 02</div>
+      <div class="step-icon">🔍</div>
+      <div class="step-title">Select a lead</div>
+      <div class="step-desc">Pick a prospect to personalise for</div>
+    </div>
+    <div class="step-card" id="step3">
+      <div class="step-status"></div>
+      <div class="step-num">Step 03</div>
+      <div class="step-icon">✍️</div>
+      <div class="step-title">AI writes email</div>
+      <div class="step-desc">Claude personalises using lead data</div>
+    </div>
+    <div class="step-card" id="step4">
+      <div class="step-status"></div>
+      <div class="step-num">Step 04</div>
+      <div class="step-icon">🚀</div>
+      <div class="step-title">Send via N8N</div>
+      <div class="step-desc">N8N automates sending via Gmail/SMTP</div>
+    </div>
+  </div>
+
+  <!-- STATS BAR -->
+  <div class="stats-bar">
+    <div class="stat-box"><div class="stat-n" id="totalCount">8</div><div class="stat-l">Total leads</div></div>
+    <div class="stat-box"><div class="stat-n" id="genCount">0</div><div class="stat-l">Emails generated</div></div>
+    <div class="stat-box"><div class="stat-n">~45s</div><div class="stat-l">Time per 10 emails</div></div>
+    <div class="stat-box"><div class="stat-n">3×</div><div class="stat-l">Higher reply rate vs template</div></div>
+  </div>
+
+  <!-- LEADS + COMPOSE -->
+  <div class="section-row">
+    <!-- LEADS TABLE -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Lead list</div>
+        <button class="select-all-btn" onclick="selectAll()">Select all</button>
+      </div>
+      <table class="leads-table" id="leadsTable">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Company</th>
+            <th>Industry</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="leadsBody">
+        </tbody>
+      </table>
+    </div>
+
+    <!-- COMPOSE -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Generate personalised email</div>
+      </div>
+      <div class="panel-body">
+        <div id="selectedInfo" style="background:var(--paper);border:1px solid var(--border);padding:0.8rem 1rem;border-radius:2px;font-size:0.82rem;color:var(--muted);margin-bottom:1rem;">
+          ← Select a lead from the table to personalise for
+        </div>
+
+        <label>Your product/service</label>
+        <input type="text" id="product" value="AI chatbot automation for businesses" placeholder="What you're selling">
+
+        <label>Your offer / hook</label>
+        <input type="text" id="offer" value="Free chatbot setup + 30-day trial, no upfront cost" placeholder="What makes it compelling">
+
+        <label>Your name & company</label>
+        <input type="text" id="sender" value="Shazan from NeuralCraft">
+
+        <div class="action-row" style="margin-top:1rem; margin-bottom:1rem;">
+          <button class="btn-gen" id="genBtn" onclick="generateEmail()">Generate email ✦</button>
+          <button class="btn-copy" onclick="copyEmail()">Copy</button>
+        </div>
+
+        <div style="font-size:0.75rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:0.5rem;">Generated email</div>
+        <div class="output-area" id="emailOutput">
+          <span class="placeholder-hint">Select a lead and click "Generate email" to see a personalised cold email written by Claude...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- API KEY -->
+  <div class="api-note">
+    <span><strong>⚙️ Live mode:</strong> Add your Anthropic API key to generate real personalised emails with Claude. Without it, smart sample emails are shown.</span>
+    <input class="api-input" type="password" id="apikey" placeholder="sk-ant-... (optional)">
+  </div>
+
+</div>
+
+<script>
+const leads = [
+  { name: 'Rahim Ahmed', company: 'Ahmed Tailors', industry: 'Fashion retail', city: 'Dhaka', note: 'Family shop, 3 staff, active on Facebook' },
+  { name: 'Nadia Sultana', company: 'Nadia Pharma', industry: 'Pharmacy', city: 'Chittagong', note: 'Busy local pharmacy, needs appointment booking' },
+  { name: 'Karim Brothers', company: 'Karim Brothers Trading', industry: 'Wholesale', city: 'Sylhet', note: 'B2B wholesaler, many repeat clients' },
+  { name: 'Dr. Farah Hossain', company: 'Hossain Dental', industry: 'Healthcare', city: 'Rajshahi', note: 'Solo dentist, overwhelmed with calls' },
+  { name: 'Tanvir Islam', company: 'Tanvir Electronics', industry: 'Electronics', city: 'Dhaka', note: 'Sells phones & gadgets, wants online orders' },
+  { name: 'Ritu Roy', company: 'Ritu Catering', industry: 'Food & catering', city: 'Khulna', note: 'Wedding & event caterer, seasonal spikes' },
+  { name: 'Shahid Mia', company: 'Shahid Auto Parts', industry: 'Automotive', city: 'Dhaka', note: 'Parts dealer, many phone inquiries daily' },
+  { name: 'Keya Akter', company: 'Keya Boutique', industry: 'Fashion/clothing', city: 'Mymensingh', note: 'Women\'s boutique, wants to sell online' },
+];
+
+let selectedLead = null;
+let generatedEmail = '';
+let genCount = 0;
+
+function renderTable() {
+  const tbody = document.getElementById('leadsBody');
+  tbody.innerHTML = leads.map((l, i) => `
+    <tr onclick="selectLead(${i})" id="row-${i}">
+      <td><div class="lead-name">${l.name}</div></td>
+      <td><div class="lead-company">${l.company}</div><div style="font-size:0.72rem;color:var(--muted)">${l.city}</div></td>
+      <td style="font-size:0.78rem;color:var(--muted)">${l.industry}</td>
+      <td><span class="status-badge s-new" id="status-${i}">New</span></td>
+    </tr>`).join('');
+}
+
+function selectLead(i) {
+  document.querySelectorAll('.leads-table tr').forEach(r => r.classList.remove('selected'));
+  document.getElementById(`row-${i}`)?.classList.add('selected');
+  selectedLead = leads[i];
+  document.getElementById('selectedInfo').innerHTML = `
+    <strong>${selectedLead.name}</strong> · ${selectedLead.company} · ${selectedLead.city}<br>
+    <span style="color:var(--muted)">${selectedLead.note}</span>`;
+
+  // advance pipeline
+  document.getElementById('step2').className = 'step-card done';
+  document.getElementById('step3').className = 'step-card active';
+}
+
+function selectAll() {
+  document.querySelectorAll('.leads-table tbody tr').forEach(r => r.classList.add('selected'));
+  selectedLead = leads[0];
+}
+
+function getEmailPrompt() {
+  const product = document.getElementById('product').value;
+  const offer = document.getElementById('offer').value;
+  const sender = document.getElementById('sender').value;
+  return `Write a short, personalised cold outreach email to ${selectedLead.name} at ${selectedLead.company}.
+
+About the prospect:
+- Company: ${selectedLead.company}
+- Industry: ${selectedLead.industry}
+- Location: ${selectedLead.city}, Bangladesh  
+- Context: ${selectedLead.note}
+
+What I'm selling: ${product}
+My offer/hook: ${offer}
+Sender: ${sender}
+
+Rules:
+- Keep it short: subject + 3-4 sentence body max
+- Reference something specific about their business or industry
+- One clear CTA at the end
+- Sound like a real human, not a sales robot
+- No fluff, no generic openers like "Hope this finds you well"
+- Format: Subject: [subject]\n\n[body]`;
+}
+
+const sampleEmails = [
+  `Subject: Quick question about ${leads[0].company}
+
+Hi Rahim,
+
+Running a tailoring shop with 3 staff means you're probably handling customer inquiries manually — sizing questions, order status, availability.
+
+I built a WhatsApp chatbot for a similar shop in Dhaka that now handles 80% of routine questions automatically. I'd love to set one up for Ahmed Tailors — free for 30 days, no upfront cost.
+
+Worth a 10-minute call this week?
+
+Best,
+Shazan from NeuralCraft`,
+  `Subject: Idea for Nadia Pharma — fewer phone calls
+
+Hi Nadia,
+
+I know pharmacies in Chittagong deal with a constant flow of calls — stock availability, medicine queries, prescription refills.
+
+I help local pharmacies automate these with an AI assistant that answers on WhatsApp 24/7. One pharmacy near Agrabad cut their incoming calls by 60% in the first month.
+
+Free setup, try it for 30 days. Interested?
+
+— Shazan, NeuralCraft`
+];
+
+async function generateEmail() {
+  if (!selectedLead) { alert('Please select a lead first!'); return; }
+  const btn = document.getElementById('genBtn');
+  const output = document.getElementById('emailOutput');
+
+  btn.disabled = true;
+  btn.innerHTML = `Generating <span class="loading-dots"><span></span><span></span><span></span></span>`;
+  output.innerHTML = '<span class="placeholder-hint">Claude is personalising...</span>';
+
+  const apiKey = document.getElementById('apikey').value.trim();
+  let email = '';
+
+  try {
+    if (apiKey) {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514', max_tokens: 400,
+          messages: [{ role: 'user', content: getEmailPrompt() }]
+        })
+      });
+      const data = await res.json();
+      email = data.content?.[0]?.text || 'Error generating email.';
+    } else {
+      await new Promise(r => setTimeout(r, 1200 + Math.random()*800));
+      const idx = leads.indexOf(selectedLead);
+      const product = document.getElementById('product').value;
+      const sender = document.getElementById('sender').value;
+      const offer = document.getElementById('offer').value;
+      email = `Subject: Quick idea for ${selectedLead.company}
+
+Hi ${selectedLead.name.split(' ')[0]},
+
+Running a ${selectedLead.industry.toLowerCase()} business in ${selectedLead.city} — I imagine ${selectedLead.note.toLowerCase().includes('call') || selectedLead.note.includes('inquiry') ? 'handling all those customer inquiries manually takes up a big part of your day' : 'you\'re looking for ways to save time and reach more customers'}.
+
+I help businesses like yours with ${product}. We've seen great results in the ${selectedLead.industry} space — ${offer}.
+
+Would you be open to a quick 10-minute call this week to see if it fits?
+
+Regards,
+${sender}`;
+    }
+  } catch(e) {
+    email = 'Error: ' + e.message;
+  }
+
+  generatedEmail = email;
+  output.textContent = email;
+  btn.disabled = false;
+  btn.textContent = 'Regenerate ✦';
+
+  // update status
+  const idx = leads.indexOf(selectedLead);
+  const statusEl = document.getElementById(`status-${idx}`);
+  if (statusEl) { statusEl.textContent = 'Generated'; statusEl.className = 'status-badge s-generated'; }
+
+  genCount++;
+  document.getElementById('genCount').textContent = genCount;
+  document.getElementById('step3').className = 'step-card done';
+  document.getElementById('step4').className = 'step-card active';
+}
+
+function copyEmail() {
+  if (!generatedEmail) return;
+  navigator.clipboard.writeText(generatedEmail);
+  const btn = document.querySelector('.btn-copy');
+  btn.textContent = 'Copied ✓';
+  setTimeout(() => btn.textContent = 'Copy', 1500);
+}
+
+renderTable();
+</script>
+</body>
+</html>

@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuralCraft — AI Automation Agency</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0a0a;
+    --paper: #f5f2eb;
+    --accent: #c8f135;
+    --accent2: #ff4d1c;
+    --muted: #6b6b5e;
+    --card: #ffffff;
+    --border: #e0ddd4;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.2rem 4rem;
+    background: var(--paper);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 1.25rem;
+    letter-spacing: -0.03em;
+  }
+  .nav-logo span { color: var(--accent2); }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a {
+    text-decoration: none; color: var(--muted);
+    font-size: 0.9rem; font-weight: 400;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-cta {
+    background: var(--ink); color: var(--paper);
+    padding: 0.55rem 1.4rem; border-radius: 2px;
+    font-size: 0.88rem; font-weight: 500;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  .nav-cta:hover { background: var(--accent2); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    justify-content: flex-end;
+    padding: 8rem 4rem 5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-bg-text {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(120px, 20vw, 260px);
+    font-weight: 800;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--border);
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+    letter-spacing: -0.05em;
+    opacity: 0.6;
+  }
+  .hero-tag {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--ink);
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.35rem 0.9rem;
+    border-radius: 1px;
+    margin-bottom: 2rem;
+    width: fit-content;
+  }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(3.5rem, 7vw, 7rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    max-width: 900px;
+    position: relative;
+    z-index: 1;
+  }
+  .hero h1 em {
+    font-style: normal;
+    color: var(--accent2);
+  }
+  .hero-sub {
+    margin-top: 2.5rem;
+    display: flex; align-items: flex-start; gap: 6rem;
+    position: relative; z-index: 1;
+  }
+  .hero-sub p {
+    max-width: 380px;
+    font-size: 1.05rem; font-weight: 300;
+    line-height: 1.7; color: var(--muted);
+  }
+  .hero-cta-group { display: flex; flex-direction: column; gap: 1rem; align-items: flex-start; }
+  .btn-primary {
+    background: var(--ink); color: var(--paper);
+    padding: 0.9rem 2.2rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem; font-weight: 500;
+    text-decoration: none; border-radius: 2px;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    transition: all 0.2s;
+    border: 1.5px solid var(--ink);
+  }
+  .btn-primary:hover { background: var(--accent2); border-color: var(--accent2); }
+  .btn-outline {
+    background: transparent; color: var(--ink);
+    padding: 0.9rem 2.2rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem; font-weight: 500;
+    text-decoration: none; border-radius: 2px;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    border: 1.5px solid var(--ink);
+    transition: all 0.2s;
+  }
+  .btn-outline:hover { background: var(--ink); color: var(--paper); }
+  .scroll-hint {
+    position: absolute; bottom: 2.5rem; right: 4rem;
+    font-size: 0.78rem; color: var(--muted);
+    letter-spacing: 0.06em; text-transform: uppercase;
+    display: flex; align-items: center; gap: 0.6rem;
+    writing-mode: vertical-rl;
+  }
+  .scroll-line {
+    width: 1px; height: 60px;
+    background: linear-gradient(to bottom, var(--muted), transparent);
+    display: block;
+  }
+
+  /* MARQUEE */
+  .marquee-section {
+    overflow: hidden;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--ink);
+    padding: 1rem 0;
+  }
+  .marquee-track {
+    display: flex; gap: 3rem;
+    animation: marquee 18s linear infinite;
+    white-space: nowrap;
+    width: max-content;
+  }
+  .marquee-item {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem; font-weight: 600;
+    color: var(--paper);
+    letter-spacing: 0.1em; text-transform: uppercase;
+    display: flex; align-items: center; gap: 1rem;
+  }
+  .marquee-dot { color: var(--accent); font-size: 1.2rem; }
+  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  /* SERVICES */
+  .section { padding: 7rem 4rem; }
+  .section-header {
+    display: flex; justify-content: space-between;
+    align-items: flex-end; margin-bottom: 4rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+  }
+  .section-number {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.78rem; font-weight: 600;
+    color: var(--muted); letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.5rem, 4vw, 3.8rem);
+    font-weight: 800; line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+  .section-title em { font-style: italic; color: var(--muted); }
+
+  .demos-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+  .demo-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    display: flex; flex-direction: column;
+  }
+  .demo-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+    z-index: 2;
+  }
+  .demo-card::before {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent2);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+  }
+  .demo-card:hover::before { transform: scaleX(1); }
+  .card-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem; font-weight: 700;
+    color: var(--muted); letter-spacing: 0.1em;
+    text-transform: uppercase; margin-bottom: 2rem;
+  }
+  .card-icon {
+    font-size: 2.5rem; margin-bottom: 1.5rem;
+    display: block;
+  }
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.4rem; font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+  }
+  .card-desc {
+    font-size: 0.9rem; font-weight: 300;
+    color: var(--muted); line-height: 1.7;
+    flex: 1;
+    margin-bottom: 2rem;
+  }
+  .card-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2rem; }
+  .tag {
+    font-size: 0.72rem; letter-spacing: 0.05em;
+    text-transform: uppercase; font-weight: 500;
+    padding: 0.3rem 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: 1px; color: var(--muted);
+  }
+  .card-link {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-size: 0.88rem; font-weight: 500;
+    color: var(--ink); text-decoration: none;
+    letter-spacing: 0.02em;
+    transition: gap 0.2s;
+  }
+  .card-link:hover { gap: 0.9rem; }
+  .card-link .arrow { font-size: 1.1rem; }
+
+  /* ABOUT */
+  .about-section {
+    padding: 7rem 4rem;
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .about-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8rem; align-items: center;
+  }
+  .about-label {
+    font-size: 0.78rem; font-weight: 600;
+    color: var(--accent); letter-spacing: 0.1em;
+    text-transform: uppercase; margin-bottom: 1.5rem;
+  }
+  .about-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 3.5vw, 3.2rem);
+    font-weight: 800; line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin-bottom: 2rem;
+  }
+  .about-text {
+    font-size: 1rem; font-weight: 300;
+    line-height: 1.8;
+    color: rgba(245, 242, 235, 0.65);
+    margin-bottom: 1.5rem;
+  }
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  .stat { border-top: 1px solid rgba(255,255,255,0.12); padding-top: 1.5rem; }
+  .stat-number {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.8rem; font-weight: 800;
+    color: var(--accent); line-height: 1;
+    margin-bottom: 0.4rem;
+  }
+  .stat-label {
+    font-size: 0.82rem; color: rgba(245,242,235,0.5);
+    font-weight: 300; letter-spacing: 0.04em;
+  }
+
+  /* STACK */
+  .stack-section { padding: 7rem 4rem; }
+  .tools-row {
+    display: flex; flex-wrap: wrap; gap: 1rem;
+    margin-top: 3rem;
+  }
+  .tool-chip {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 0.8rem 1.4rem;
+    border-radius: 2px;
+    font-size: 0.88rem; font-weight: 500;
+    display: flex; align-items: center; gap: 0.6rem;
+    transition: all 0.2s;
+  }
+  .tool-chip:hover {
+    background: var(--ink); color: var(--paper);
+    border-color: var(--ink);
+  }
+  .tool-chip .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* CONTACT */
+  .contact-section {
+    padding: 7rem 4rem;
+    border-top: 1px solid var(--border);
+  }
+  .contact-inner {
+    max-width: 700px;
+  }
+  .contact-pre {
+    font-size: 0.78rem; font-weight: 600; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2);
+    margin-bottom: 1.5rem;
+  }
+  .contact-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 5rem);
+    font-weight: 800; line-height: 0.95;
+    letter-spacing: -0.04em; margin-bottom: 2.5rem;
+  }
+  .contact-email {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.4rem, 2.5vw, 2rem);
+    font-weight: 700; color: var(--ink);
+    text-decoration: none;
+    border-bottom: 2px solid var(--accent2);
+    padding-bottom: 0.2rem;
+    transition: color 0.2s;
+  }
+  .contact-email:hover { color: var(--accent2); }
+
+  /* FOOTER */
+  footer {
+    padding: 2rem 4rem;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 1rem;
+    letter-spacing: -0.03em;
+  }
+  .footer-logo span { color: var(--accent2); }
+  .footer-copy { font-size: 0.8rem; color: var(--muted); }
+
+  /* ANIMATIONS */
+  .fade-up {
+    opacity: 0; transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 900px) {
+    nav { padding: 1rem 2rem; }
+    .nav-links { display: none; }
+    .hero { padding: 7rem 2rem 4rem; }
+    .hero-sub { flex-direction: column; gap: 2rem; }
+    .section { padding: 5rem 2rem; }
+    .demos-grid { grid-template-columns: 1fr; }
+    .about-inner { grid-template-columns: 1fr; gap: 3rem; }
+    .about-section { padding: 5rem 2rem; }
+    .stack-section, .contact-section { padding: 5rem 2rem; }
+    footer { padding: 1.5rem 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Neural<span>Craft</span></div>
+  <ul class="nav-links">
+    <li><a href="#demos">Demos</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#stack">Stack</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="#contact" class="nav-cta">Get in touch</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg-text">AI</div>
+  <div class="hero-tag">✦ AI Automation Agency — Bangladesh</div>
+  <h1>We automate<br>your business<br>with <em>AI.</em></h1>
+  <div class="hero-sub">
+    <p>We build intelligent automation systems using Claude AI — cutting hours of manual work into seconds. Content, chatbots, outreach — all on autopilot.</p>
+    <div class="hero-cta-group">
+      <a href="#demos" class="btn-primary">See live demos →</a>
+      <a href="#contact" class="btn-outline">Work with us</a>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <span class="scroll-line"></span>
+    Scroll
+  </div>
+</section>
+
+<div class="marquee-section">
+  <div class="marquee-track">
+    <span class="marquee-item"><span class="marquee-dot">✦</span> AI Content Generation</span>
+    <span class="marquee-item"><span class="marquee-dot">✦</span> Chatbot Automation</span>
+    <span class="marquee-item"><span class="marquee-dot">✦</span> Lead Generation</span>
+    <span class="marquee-item"><span class="marquee-dot">✦</span> Workflow Automation</span>
+    <span class="marquee-item"><span class="marquee-dot">✦</span> N8N Pipelines</span>
+    <span class="marquee-item"><span class="marquee-dot">✦</span> Claude API</span>
+    <span class="marquee-item"><span class="marquee-dot">✦</span> Powered by Anthropic</span>
+    <span class="marquee-item"><span class="marquee-dot">✦</span> AI Content Generation</span>
+    <span class="marquee-item"><span class="marquee-dot">✦</span> Chatbot Automation</span>
+    <span class="marquee-item"><span class="marquee-dot">✦</span> Lead Generation</span>
+    <span class="marquee-item"><span class="marquee-dot">✦</span> Workflow Automation</span>
+    <span class="marquee-item"><span class="marquee-dot">✦</span> N8N Pipelines</span>
+    <span class="marquee-item"><span class="marquee-dot">✦</span> Claude API</span>
+    <span class="marquee-item"><span class="marquee-dot">✦</span> Powered by Anthropic</span>
+  </div>
+</div>
+
+<section class="section" id="demos">
+  <div class="section-header">
+    <div>
+      <div class="section-number">01 — Services</div>
+      <h2 class="section-title">What we <em>build</em></h2>
+    </div>
+    <p style="max-width:280px; font-size:0.88rem; color:var(--muted); font-weight:300; line-height:1.7;">Three core services, each with a live interactive demo you can try right now.</p>
+  </div>
+
+  <div class="demos-grid">
+    <div class="demo-card fade-up">
+      <div class="card-num">001</div>
+      <span class="card-icon">✍️</span>
+      <div class="card-title">AI Content Agency</div>
+      <p class="card-desc">Generate blog posts, social media captions, product descriptions, and email campaigns — in seconds. Powered by Claude AI, customised to your brand voice.</p>
+      <div class="card-tags">
+        <span class="tag">Blog writing</span>
+        <span class="tag">Social media</span>
+        <span class="tag">Email copy</span>
+      </div>
+      <a href="demo-content.html" class="card-link">Try live demo <span class="arrow">→</span></a>
+    </div>
+
+    <div class="demo-card fade-up" style="transition-delay:0.12s">
+      <div class="card-num">002</div>
+      <span class="card-icon">🤖</span>
+      <div class="card-title">Chatbot Builder</div>
+      <p class="card-desc">Custom AI chatbots for your website, WhatsApp, or Telegram. Answer customer questions 24/7, capture leads, and book appointments — automatically.</p>
+      <div class="card-tags">
+        <span class="tag">WhatsApp</span>
+        <span class="tag">Website widget</span>
+        <span class="tag">24/7 support</span>
+      </div>
+      <a href="demo-chatbot.html" class="card-link">Try live demo <span class="arrow">→</span></a>
+    </div>
+
+    <div class="demo-card fade-up" style="transition-delay:0.24s">
+      <div class="card-num">003</div>
+      <span class="card-icon">🎯</span>
+      <div class="card-title">AI Lead Gen</div>
+      <p class="card-desc">Find prospects and send hyper-personalised outreach emails automatically. Our AI researches each lead and writes a message that actually gets replies.</p>
+      <div class="card-tags">
+        <span class="tag">Personalised emails</span>
+        <span class="tag">Auto outreach</span>
+        <span class="tag">N8N pipeline</span>
+      </div>
+      <a href="demo-leadgen.html" class="card-link">Try live demo <span class="arrow">→</span></a>
+    </div>
+  </div>
+</section>
+
+<section class="about-section" id="about">
+  <div class="about-inner">
+    <div>
+      <div class="about-label">✦ Who we are</div>
+      <h2 class="about-title">Built in Bangladesh.<br>Serving the world.</h2>
+      <p class="about-text">We're an AI automation agency using the latest tools — Claude AI, N8N, and custom-built pipelines — to help businesses save time and grow faster.</p>
+      <p class="about-text">Every solution we build is tailored, practical, and affordable. No fluff. Just automations that actually work.</p>
+      <a href="#contact" class="btn-primary" style="margin-top:1rem; display:inline-flex;">Start a project →</a>
+    </div>
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="stat-number">10×</div>
+        <div class="stat-label">Faster content production</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">24/7</div>
+        <div class="stat-label">Automated chatbot support</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">3</div>
+        <div class="stat-label">Core AI services</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">$0</div>
+        <div class="stat-label">Infrastructure cost to start</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="stack-section" id="stack">
+  <div class="section-header">
+    <div>
+      <div class="section-number">03 — Technology</div>
+      <h2 class="section-title">Our <em>stack</em></h2>
+    </div>
+  </div>
+  <div class="tools-row">
+    <div class="tool-chip"><span class="dot"></span> Claude AI (Anthropic)</div>
+    <div class="tool-chip"><span class="dot"></span> N8N Automation</div>
+    <div class="tool-chip"><span class="dot"></span> Claude Code</div>
+    <div class="tool-chip"><span class="dot"></span> WhatsApp API</div>
+    <div class="tool-chip"><span class="dot"></span> Gmail / SMTP</div>
+    <div class="tool-chip"><span class="dot"></span> Telegram Bot API</div>
+    <div class="tool-chip"><span class="dot"></span> Google Sheets</div>
+    <div class="tool-chip"><span class="dot"></span> Airtable</div>
+    <div class="tool-chip"><span class="dot"></span> Webhook Triggers</div>
+    <div class="tool-chip"><span class="dot"></span> REST APIs</div>
+    <div class="tool-chip"><span class="dot"></span> GitHub Pages</div>
+  </div>
+</section>
+
+<section class="contact-section" id="contact">
+  <div class="contact-inner">
+    <div class="contact-pre">✦ Let's work together</div>
+    <h2 class="contact-title">Ready to automate?</h2>
+    <p style="font-size:1rem; color:var(--muted); margin-bottom:2.5rem; font-weight:300; line-height:1.7; max-width:500px;">Drop us a message and we'll show you exactly how AI can save your business 20+ hours per week.</p>
+    <a href="mailto:hello@neuralcraft.ai" class="contact-email">hello@neuralcraft.ai</a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">Neural<span>Craft</span></div>
+  <div class="footer-copy">© 2025 NeuralCraft · Rajshahi, Bangladesh</div>
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

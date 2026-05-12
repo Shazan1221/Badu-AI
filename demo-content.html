@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Content Agency Demo — NeuralCraft</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0a0a;
+    --paper: #f5f2eb;
+    --accent: #c8f135;
+    --accent2: #ff4d1c;
+    --muted: #6b6b5e;
+    --card: #ffffff;
+    --border: #e0ddd4;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; }
+
+  .top-bar {
+    padding: 1rem 3rem;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--paper);
+    position: sticky; top: 0; z-index: 50;
+  }
+  .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem; text-decoration: none; color: var(--ink); }
+  .logo span { color: var(--accent2); }
+  .back-link { font-size: 0.85rem; color: var(--muted); text-decoration: none; display: flex; align-items: center; gap: 0.4rem; }
+  .back-link:hover { color: var(--ink); }
+  .demo-badge { background: var(--accent); color: var(--ink); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.3rem 0.8rem; border-radius: 1px; }
+
+  .hero-strip {
+    background: var(--ink); color: var(--paper);
+    padding: 3.5rem 3rem;
+    display: flex; align-items: flex-end; justify-content: space-between;
+  }
+  .hero-strip h1 { font-family: 'Syne', sans-serif; font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
+  .hero-strip h1 em { color: var(--accent); font-style: normal; }
+  .hero-strip p { max-width: 320px; font-size: 0.9rem; color: rgba(245,242,235,0.6); font-weight: 300; line-height: 1.7; }
+
+  .app-wrapper {
+    max-width: 1100px; margin: 0 auto;
+    padding: 3rem;
+    display: grid; grid-template-columns: 340px 1fr; gap: 2rem;
+  }
+
+  /* LEFT PANEL */
+  .config-panel { display: flex; flex-direction: column; gap: 1.2rem; }
+  .panel-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+  .config-card { background: var(--card); border: 1px solid var(--border); padding: 1.4rem; border-radius: 2px; }
+  .config-card h3 { font-family: 'Syne', sans-serif; font-size: 0.85rem; font-weight: 700; margin-bottom: 1rem; }
+
+  .type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+  .type-btn {
+    background: transparent; border: 1px solid var(--border);
+    padding: 0.7rem 0.5rem; border-radius: 2px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 500;
+    cursor: pointer; text-align: center; transition: all 0.15s;
+    color: var(--muted);
+  }
+  .type-btn:hover { border-color: var(--ink); color: var(--ink); }
+  .type-btn.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+  label { display: block; font-size: 0.82rem; font-weight: 500; margin-bottom: 0.4rem; color: var(--ink); }
+  input[type="text"], textarea, select {
+    width: 100%; padding: 0.7rem 0.9rem;
+    border: 1px solid var(--border); border-radius: 2px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
+    background: var(--paper); color: var(--ink);
+    transition: border-color 0.2s;
+    resize: vertical;
+  }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: var(--ink); }
+  textarea { min-height: 80px; }
+  select { appearance: none; cursor: pointer; }
+
+  .tone-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .tone-chip {
+    background: transparent; border: 1px solid var(--border);
+    padding: 0.3rem 0.7rem; border-radius: 1px;
+    font-size: 0.75rem; cursor: pointer;
+    transition: all 0.15s; color: var(--muted);
+  }
+  .tone-chip:hover { border-color: var(--ink); color: var(--ink); }
+  .tone-chip.active { background: var(--accent); color: var(--ink); border-color: var(--accent); font-weight: 600; }
+
+  .generate-btn {
+    width: 100%; padding: 1rem;
+    background: var(--ink); color: var(--paper);
+    border: none; border-radius: 2px;
+    font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700;
+    cursor: pointer; letter-spacing: 0.02em;
+    transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+  }
+  .generate-btn:hover { background: var(--accent2); }
+  .generate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* RIGHT PANEL */
+  .output-panel { display: flex; flex-direction: column; gap: 1.2rem; }
+  .output-card {
+    background: var(--card); border: 1px solid var(--border);
+    padding: 2rem; border-radius: 2px; flex: 1;
+    min-height: 400px; position: relative;
+  }
+  .output-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+  .output-title { font-family: 'Syne', sans-serif; font-size: 0.85rem; font-weight: 700; }
+  .copy-btn {
+    background: transparent; border: 1px solid var(--border);
+    padding: 0.35rem 0.9rem; border-radius: 1px;
+    font-size: 0.78rem; cursor: pointer; font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s; color: var(--muted);
+  }
+  .copy-btn:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .output-content {
+    font-size: 0.95rem; font-weight: 300; line-height: 1.8;
+    color: var(--ink); white-space: pre-wrap;
+  }
+  .placeholder-state {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    height: 300px; gap: 1rem;
+  }
+  .placeholder-icon { font-size: 3rem; opacity: 0.3; }
+  .placeholder-text { font-size: 0.88rem; color: var(--muted); font-weight: 300; }
+  .loading-dots { display: flex; gap: 6px; }
+  .loading-dots span {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--ink); opacity: 0.3;
+    animation: dot-pulse 1.2s ease-in-out infinite;
+  }
+  .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes dot-pulse { 0%,80%,100% { opacity: 0.3; transform: scale(1); } 40% { opacity: 1; transform: scale(1.2); } }
+
+  .stats-row { display: flex; gap: 1rem; }
+  .stat-chip {
+    background: var(--paper); border: 1px solid var(--border);
+    padding: 0.6rem 1rem; border-radius: 2px; flex: 1; text-align: center;
+  }
+  .stat-chip .n { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800; }
+  .stat-chip .l { font-size: 0.72rem; color: var(--muted); }
+
+  .api-note {
+    background: #fffbf0; border: 1px solid #f0e6c0;
+    padding: 1rem 1.2rem; border-radius: 2px;
+    font-size: 0.8rem; line-height: 1.6; color: #7a6030;
+  }
+  .api-note strong { color: #5a4010; }
+
+  @media (max-width: 800px) {
+    .app-wrapper { grid-template-columns: 1fr; padding: 1.5rem; }
+    .hero-strip { padding: 2rem 1.5rem; flex-direction: column; gap: 1rem; }
+    .top-bar { padding: 1rem 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="index.html" class="logo">Neural<span>Craft</span></a>
+  <span class="demo-badge">Live Demo</span>
+  <a href="index.html" class="back-link">← Back to site</a>
+</div>
+
+<div class="hero-strip">
+  <div>
+    <h1>✍️ AI Content<br><em>Agency</em></h1>
+  </div>
+  <p>Type a topic, pick a format and tone — watch Claude write professional content in seconds. This is what we build for your business.</p>
+</div>
+
+<div class="app-wrapper">
+  <!-- CONFIG -->
+  <div class="config-panel">
+    <div class="config-card">
+      <div class="panel-label">Content type</div>
+      <div class="type-grid">
+        <button class="type-btn active" data-type="blog">📝 Blog post</button>
+        <button class="type-btn" data-type="social">📱 Social post</button>
+        <button class="type-btn" data-type="email">📧 Email</button>
+        <button class="type-btn" data-type="product">🛍️ Product desc.</button>
+      </div>
+    </div>
+
+    <div class="config-card">
+      <div class="panel-label">Your brief</div>
+      <div style="margin-bottom:0.9rem">
+        <label>Topic / Product name</label>
+        <input type="text" id="topic" placeholder="e.g. Organic honey farm in Sylhet" value="Organic honey farm in Sylhet">
+      </div>
+      <div>
+        <label>Key points (optional)</label>
+        <textarea id="points" placeholder="e.g. 100% natural, harvested in hills, ships across BD...">100% natural, harvested in Sylhet hills, ships across Bangladesh, award-winning taste</textarea>
+      </div>
+    </div>
+
+    <div class="config-card">
+      <div class="panel-label">Tone</div>
+      <div class="tone-chips">
+        <button class="tone-chip active" data-tone="Professional">Professional</button>
+        <button class="tone-chip" data-tone="Casual">Casual</button>
+        <button class="tone-chip" data-tone="Persuasive">Persuasive</button>
+        <button class="tone-chip" data-tone="Witty">Witty</button>
+        <button class="tone-chip" data-tone="Formal">Formal</button>
+        <button class="tone-chip" data-tone="Friendly">Friendly</button>
+      </div>
+    </div>
+
+    <div class="config-card">
+      <div class="panel-label">Language</div>
+      <select id="lang">
+        <option value="English">English</option>
+        <option value="Bangla">Bangla (বাংলা)</option>
+        <option value="English and Bangla mix">Banglish mix</option>
+      </select>
+    </div>
+
+    <div class="api-note">
+      <strong>⚙️ Demo note:</strong> This demo calls the Claude API live. Enter your Anthropic API key below to activate it, or it shows a sample output.
+    </div>
+
+    <div class="config-card">
+      <label>Anthropic API Key (optional)</label>
+      <input type="password" id="apikey" placeholder="sk-ant-...">
+    </div>
+
+    <button class="generate-btn" id="genBtn" onclick="generate()">
+      <span id="btnText">Generate content ✦</span>
+    </button>
+  </div>
+
+  <!-- OUTPUT -->
+  <div class="output-panel">
+    <div class="output-card" id="outputCard">
+      <div class="output-header">
+        <div class="output-title" id="outputLabel">Your generated content</div>
+        <button class="copy-btn" onclick="copyOutput()">Copy ✦</button>
+      </div>
+      <div id="outputArea">
+        <div class="placeholder-state">
+          <div class="placeholder-icon">✍️</div>
+          <div class="placeholder-text">Fill in the brief and click Generate</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-row" id="statsRow" style="display:none">
+      <div class="stat-chip">
+        <div class="n" id="wordCount">0</div>
+        <div class="l">Words</div>
+      </div>
+      <div class="stat-chip">
+        <div class="n" id="charCount">0</div>
+        <div class="l">Characters</div>
+      </div>
+      <div class="stat-chip">
+        <div class="n" id="timeCount">0s</div>
+        <div class="l">Generated in</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let selectedType = 'blog';
+let selectedTone = 'Professional';
+let generatedText = '';
+
+document.querySelectorAll('.type-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedType = btn.dataset.type;
+  });
+});
+
+document.querySelectorAll('.tone-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.tone-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    selectedTone = chip.dataset.tone;
+  });
+});
+
+function getPrompt() {
+  const topic = document.getElementById('topic').value || 'a local business';
+  const points = document.getElementById('points').value;
+  const lang = document.getElementById('lang').value;
+  const types = {
+    blog: `Write a compelling blog post (300-400 words)`,
+    social: `Write an engaging social media post (Instagram/Facebook, 80-120 words with relevant emojis and hashtags)`,
+    email: `Write a professional marketing email (subject line + body, 150-200 words)`,
+    product: `Write a persuasive product description (100-150 words)`
+  };
+  return `${types[selectedType]} about: ${topic}.
+${points ? `Key points to include: ${points}` : ''}
+Tone: ${selectedTone}
+Language: ${lang}
+Make it feel authentic and tailored. No generic filler. Output only the content, no meta-commentary.`;
+}
+
+const SAMPLE = {
+  blog: `**The Sweet Secret Hidden in Sylhet's Hills**
+
+Nestled deep within the rolling green hills of Sylhet, something extraordinary is happening — bees are creating liquid gold, and one farm is making sure it reaches your table in its most natural form.
+
+Our organic honey isn't just honey. It's the result of thousands of flowers, ancient forests, and bees that have never known pesticides or artificial interference. Every jar you open carries the fragrance of Sylhet's hill air.
+
+**Why our honey is different:**
+
+Unlike mass-produced honey that's heated, filtered, and stripped of its natural goodness, ours is cold-extracted and tested for purity. The colour varies by season — amber in spring, darker and richer after the monsoon. That's nature, not inconsistency.
+
+We've been awarded for taste because we let the bees do what they've always done — we just get out of the way.
+
+**Order yours today** and taste the difference that hills, clean air, and honest farming make. We ship across Bangladesh, fresh to your door.`,
+
+  social: `🍯 Real honey. Real hills. Real Sylhet.
+
+Our organic honey is harvested straight from the lush hilltops of Sylhet — 100% natural, zero additives, zero compromise. 
+
+Award-winning taste that you can actually taste the difference in. ✨
+
+🚚 Shipping across Bangladesh
+🌿 100% natural & pure
+🏆 Award-winning farm
+
+Ready to taste the real thing?
+DM us or link in bio 👆
+
+#SylhetHoney #OrganicBD #MadeinBangladesh #NaturalHoney #HealthyLiving #BangladeshFarm`,
+
+  email: `Subject: Taste Sylhet's Finest — Award-Winning Organic Honey, Delivered to You
+
+Hi there,
+
+We wanted to introduce you to something special.
+
+Deep in the hills of Sylhet, our bees produce some of Bangladesh's finest honey — 100% natural, cold-extracted, and completely free from additives. It's the kind of honey that tastes like it came from somewhere real. Because it did.
+
+**What makes us different:**
+✓ Harvested from Sylhet's pristine hill forests
+✓ Award-winning taste, verified purity
+✓ Ships fresh across all of Bangladesh
+
+Whether you're looking for a healthier daily staple or a meaningful gift, our honey speaks for itself.
+
+**Order today and get free shipping on your first jar.**
+
+With warmth,
+The Sylhet Honey Farm Team`,
+
+  product: `**Sylhet Hill Organic Honey — 500g**
+
+Pure. Raw. Extraordinary.
+
+Sourced directly from the flower-rich hills of Sylhet, this award-winning honey is everything commercial honey isn't — unheated, unfiltered, and bursting with natural enzymes, antioxidants, and complex flavour.
+
+Each jar carries the unique character of Bangladesh's most pristine forest landscape. The colour and taste shift with the seasons, reflecting the flowers our bees visited that month.
+
+No additives. No shortcuts. Just honest, natural honey the way it was meant to be.
+
+🌿 100% Organic  |  🍯 Cold-extracted  |  🚚 Ships nationwide
+⭐ Award-winning farm`
+};
+
+async function generate() {
+  const btn = document.getElementById('genBtn');
+  const btnText = document.getElementById('btnText');
+  const outputArea = document.getElementById('outputArea');
+  const apiKey = document.getElementById('apikey').value.trim();
+  const start = Date.now();
+
+  btn.disabled = true;
+  btnText.textContent = 'Generating...';
+  outputArea.innerHTML = `<div class="placeholder-state"><div class="loading-dots"><span></span><span></span><span></span></div><div class="placeholder-text">Claude is writing...</div></div>`;
+
+  try {
+    let text = '';
+    if (apiKey) {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 800,
+          messages: [{ role: 'user', content: getPrompt() }]
+        })
+      });
+      const data = await res.json();
+      text = data.content?.[0]?.text || 'Error: Could not generate content. Check your API key.';
+    } else {
+      await new Promise(r => setTimeout(r, 1500));
+      text = SAMPLE[selectedType];
+    }
+
+    generatedText = text;
+    const elapsed = ((Date.now() - start) / 1000).toFixed(1);
+    const words = text.split(/\s+/).filter(Boolean).length;
+
+    outputArea.innerHTML = `<div class="output-content">${escapeHtml(text)}</div>`;
+    document.getElementById('statsRow').style.display = 'flex';
+    document.getElementById('wordCount').textContent = words;
+    document.getElementById('charCount').textContent = text.length;
+    document.getElementById('timeCount').textContent = elapsed + 's';
+  } catch(e) {
+    outputArea.innerHTML = `<div class="placeholder-state"><div class="placeholder-text">Error: ${e.message}</div></div>`;
+  }
+
+  btn.disabled = false;
+  btnText.textContent = 'Generate again ✦';
+}
+
+function escapeHtml(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+}
+
+function copyOutput() {
+  if (!generatedText) return;
+  navigator.clipboard.writeText(generatedText);
+  const btn = document.querySelector('.copy-btn');
+  btn.textContent = 'Copied ✓';
+  setTimeout(() => btn.textContent = 'Copy ✦', 1500);
+}
+</script>
+</body>
+</html>
