@@ -13,10 +13,10 @@ A professional agency website with 3 live AI demo tools, built with pure HTML/CS
 
 ## ⚡ Deploy to GitHub Pages (Free)
 
-1. Create a new GitHub repo (e.g. `neuralcraft`)
+1. Create a new GitHub repo (e.g. `BaduAI`)
 2. Upload all 4 HTML files
 3. Go to **Settings → Pages → Source: main branch / root**
-4. Your site is live at `https://yourusername.github.io/Badu-AI`
+4. Your site is live at `https://yourusername.github.io/BaduAI`
 
 ## 🔑 Activating Live Claude AI
 
